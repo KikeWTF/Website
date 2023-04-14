@@ -1,4 +1,4 @@
-name: Update Submodules
+name: Auto-update submodules
 
 on:
   schedule:
