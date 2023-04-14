@@ -1,0 +1,41 @@
+name: Create the bundle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Pull & update submodules recursively
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+
+      # Compile the 'Gallery' project
+      - name: Install the dependencies
+        run: npm install
+        working-directory: gallery
+      - name: Lint and format the code
+        run: npm run lint && npm run format
+        working-directory: gallery
+      - name: Build the project
+        run: npm run build
+        working-directory: gallery
+
+      # Create the bundle
+      - name: Create a new bundle directory
+        run: mkdir -p bundle
+      - name: Copy all the files and folders to the bundle directory
+        run: mv docker-compose.yml gallery/www/ bundle/
+      - name: Upload the compressed archive to GitHub
+        uses: actions/upload-artifact@v2
+        with:
+          name: gallery
+          path: bundle
+          if-no-files-found: error
