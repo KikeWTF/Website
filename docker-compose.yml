@@ -7,13 +7,13 @@ services:
     container_name: traefik
     restart: unless-stopped
     volumes:
-      - ./conf/traefik:/etc/traefik:ro
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - certificates:/letsencrypt:rw
     command:
       # Traefik
       - "--log.level=INFO"
       - "--api.insecure=true"
+      - "--global.checkNewVersion=true"
       - "--global.sendAnonymousUsage=false"
       # Docker provider
       - "--providers.docker=true"
@@ -26,6 +26,25 @@ services:
       - "--certificatesresolvers.ssl.acme.httpchallenge=true"
       - "--certificatesresolvers.ssl.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt.acme.json"
+      # Middlewares (redirect to https)
+      - "--http.middlewares.https-only.redirectscheme.scheme=https"
+      - "--http.middlewares.https-only.redirectscheme.permanent=true"
+      - "--http.middlewares.https-only.redirectscheme.port=443"
+      - "--http.middlewares.https-only.headers.forcestsheader=true"
+      - "--http.middlewares.https-only.headers.stspreload=true"
+      - "--http.middlewares.https-only.headers.stsseconds=315360000"
+      - "--http.middlewares.https-only.headers.stsincludesubdomains=true"
+      # Middlewares (compression)
+      - "--http.middlewares.compression.compress=true"
+      - "--http.middlewares.compression.compress.minresponsebodybytes=1024"
+      - "--http.middlewares.compression.compress.excludedcontenttypes=text/event-stream"
+      # Middlewares (jokes)
+      - "--http.middlewares.jokes.headers.customresponseheaders.Server='; DROP TABLE users; --"
+      - "--http.middlewares.jokes.headers.customresponseheaders.X-PoweredBy=Pumas, unicorns and rainbows"
+      - "--http.middlewares.jokes.headers.customresponseheaders.X-NaNaNaNaNaNaNaNa=Batman!"
+      - "--http.middlewares.jokes.headers.customresponseheaders.X-Clacks-Overhead=GNU Kike Fontan"
+      # Middlewares (chains)
+      - "--http.middlewares.security.chain.middlewares=https-only"
 
     ports:
       - "80:80"
@@ -39,10 +58,11 @@ services:
     volumes: [./gallery/www:/usr/local/apache2/htdocs]
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gallery.rule=Host(`kike.wtf`,`www.kike.wtf`) && Method(`GET`)"
+      - "traefik.http.routers.gallery.rule=Host(`gallery.kike.wtf`,`www.gallery.kike.wtf`) && Method(`GET`)"
       - "traefik.http.routers.gallery.entrypoints=websecure"
       - "traefik.http.routers.gallery.tls=true"
       - "traefik.http.routers.gallery.tls.certresolver=ssl"
+      - "traefik.http.routers.gallery.middlewares=compression@docker,security@docker,jokes@docker"
 
 volumes:
   certificates: {}
