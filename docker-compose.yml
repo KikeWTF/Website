@@ -11,21 +11,21 @@ services:
       - certificates:/letsencrypt:rw
     command:
       # Traefik
-      - "--log.level=INFO"
-      - "--api.insecure=true"
-      - "--global.checkNewVersion=true"
-      - "--global.sendAnonymousUsage=false"
+      - '--log.level=INFO'
+      - '--api.insecure=true'
+      - '--global.checkNewVersion=true'
+      - '--global.sendAnonymousUsage=false'
       # Docker provider
-      - "--providers.docker=true"
-      - "--providers.docker.watch=true"
-      - "--providers.docker.exposedbydefault=false"
+      - '--providers.docker=true'
+      - '--providers.docker.watch=true'
+      - '--providers.docker.exposedbydefault=false'
       # Entrypoints
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
       # SSL resolvers
-      - "--certificatesresolvers.ssl.acme.httpchallenge=true"
-      - "--certificatesresolvers.ssl.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.ssl.acme.storage=/letsencrypt.acme.json"
+      - '--certificatesresolvers.ssl.acme.httpchallenge=true'
+      - '--certificatesresolvers.ssl.acme.httpchallenge.entrypoint=web'
+      - '--certificatesresolvers.ssl.acme.storage=/letsencrypt.acme.json'
     labels:
       # Middlewares (redirect to https)
       - "traefik.http.middlewares.https-only.redirectscheme.scheme=https"
@@ -49,9 +49,9 @@ services:
 
 
     ports:
-      - "80:80"
-      - "443:443"
-      - "127.0.0.1:9001:8080"
+      - '80:80'
+      - '443:443'
+      - '127.0.0.1:9001:8080'
 
   gallery:
     image: httpd:alpine
@@ -59,15 +59,17 @@ services:
     container_name: gallery
     restart: unless-stopped
     volumes: [./gallery:/usr/local/apache2/htdocs:ro]
+    environment:
+      - DOMAIN: ${DOMAIN:-kike.wtf}
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gallery.rule=Host(`kike.wtf`) && PathPrefix(`/gallery/`) && Method(`GET`)"
-      - "traefik.http.middlewares.prefix-gallery.stripprefix.prefixes=/gallery"
-      - "traefik.http.middlewares.prefix-gallery.stripprefix.forceSlash=false"
-      - "traefik.http.routers.gallery.middlewares=prefix-gallery@docker"
-      - "traefik.http.routers.gallery.entrypoints=websecure"
-      - "traefik.http.routers.gallery.tls=true"
-      - "traefik.http.routers.gallery.tls.certresolver=ssl"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.gallery.rule=(Host(`www.{{ env "DOMAIN" }}`) || Host(`{{ env "DOMAIN" }}`)) && PathPrefix(`/gallery/`) && Method(`GET`)'
+      - 'traefik.http.middlewares.prefix-gallery.stripprefix.prefixes=/gallery'
+      - 'traefik.http.middlewares.prefix-gallery.stripprefix.forceSlash=false'
+      - 'traefik.http.routers.gallery.middlewares=prefix-gallery@docker'
+      - 'traefik.http.routers.gallery.entrypoints=websecure'
+      - 'traefik.http.routers.gallery.tls=true'
+      - 'traefik.http.routers.gallery.tls.certresolver=ssl'
 
 volumes:
   certificates: {}
