@@ -28,24 +28,25 @@ services:
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt.acme.json"
     labels:
       # Middlewares (redirect to https)
-      - "--traefik.http.middlewares.https-only.redirectscheme.scheme=https"
-      - "--traefik.http.middlewares.https-only.redirectscheme.permanent=true"
-      - "--traefik.http.middlewares.https-only.redirectscheme.port=443"
-      - "--traefik.http.middlewares.https-only.headers.forcestsheader=true"
-      - "--traefik.http.middlewares.https-only.headers.stspreload=true"
-      - "--traefik.http.middlewares.https-only.headers.stsseconds=315360000"
-      - "--traefik.http.middlewares.https-only.headers.stsincludesubdomains=true"
+      - "traefik.http.middlewares.https-only.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-only.redirectscheme.permanent=true"
+      - "traefik.http.middlewares.https-only.redirectscheme.port=443"
+      - "traefik.http.middlewares.https-only.headers.forcestsheader=true"
+      - "traefik.http.middlewares.https-only.headers.stspreload=true"
+      - "traefik.http.middlewares.https-only.headers.stsseconds=315360000"
+      - "traefik.http.middlewares.https-only.headers.stsincludesubdomains=true"
       # Middlewares (compression)
-      - "--traefik.http.middlewares.compression.compress=true"
-      - "--traefik.http.middlewares.compression.compress.minresponsebodybytes=1024"
-      - "--traefik.http.middlewares.compression.compress.excludedcontenttypes=text/event-stream"
+      - "traefik.http.middlewares.compression.compress=true"
+      - "traefik.http.middlewares.compression.compress.minresponsebodybytes=1024"
+      - "traefik.http.middlewares.compression.compress.excludedcontenttypes=text/event-stream"
       # Middlewares (jokes)
-      - "--traefik.http.middlewares.jokes.headers.customresponseheaders.Server='; DROP TABLE users; --"
-      - "--traefik.http.middlewares.jokes.headers.customresponseheaders.X-PoweredBy=Pumas, unicorns and rainbows"
-      - "--traefik.http.middlewares.jokes.headers.customresponseheaders.X-NaNaNaNaNaNaNaNa=Batman!"
-      - "--traefik.http.middlewares.jokes.headers.customresponseheaders.X-Clacks-Overhead=GNU Kike Fontan"
+      - "traefik.http.middlewares.jokes.headers.customresponseheaders.Server='; DROP TABLE users; --"
+      - "traefik.http.middlewares.jokes.headers.customresponseheaders.X-PoweredBy=Pumas, unicorns and rainbows"
+      - "traefik.http.middlewares.jokes.headers.customresponseheaders.X-NaNaNaNaNaNaNaNa=Batman!"
+      - "traefik.http.middlewares.jokes.headers.customresponseheaders.X-Clacks-Overhead=GNU Kike Fontan"
       # Middlewares (chains)
-      - "--traefik.http.middlewares.security.chain.middlewares=https-only"
+      - "traefik.http.middlewares.security.chain.middlewares=https-only"
+
 
     ports:
       - "80:80"
@@ -60,7 +61,10 @@ services:
     volumes: [./gallery:/usr/local/apache2/htdocs:ro]
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gallery.rule=Host(`gallery.kike.wtf`) && Method(`GET`)"
+      - "traefik.http.routers.gallery.rule=Host(`kike.wtf`) && PathPrefix(`/gallery/`) && Method(`GET`)"
+      - "traefik.http.middlewares.prefix-gallery.stripprefix.prefixes=/gallery"
+      - "traefik.http.middlewares.prefix-gallery.stripprefix.forceSlash=false"
+      - "traefik.http.routers.gallery.middlewares=prefix-gallery@docker"
       - "traefik.http.routers.gallery.entrypoints=websecure"
       - "traefik.http.routers.gallery.tls=true"
       - "traefik.http.routers.gallery.tls.certresolver=ssl"
