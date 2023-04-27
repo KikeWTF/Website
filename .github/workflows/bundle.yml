@@ -32,7 +32,7 @@ jobs:
       - name: Create a new bundle directory
         run: mkdir -p bundle
       - name: Copy all the files and folders to the bundle directory
-        run: mv docker-compose.yml bundle/ && mv gallery/www/ bundle/gallery/
+        run: mv .env docker-compose.yml bundle/ && mv gallery/www/ bundle/gallery/
       - name: Upload the compressed archive to GitHub
         uses: actions/upload-artifact@v2
         with:
