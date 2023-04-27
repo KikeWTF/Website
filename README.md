@@ -11,6 +11,5 @@ git clone --recurse-submodules git@github.com:KikeWTF/Website.git kike.wtf
 
 ## 📝 TODO
 
-- [ ] Create the README and LICENSE files
-- [ ] Add the SPONSORS file
+- [ ] Add the LICENSE
 - [ ] Learn how to setup & use middlewares
