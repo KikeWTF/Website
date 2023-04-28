@@ -3,7 +3,7 @@ http:
   middlewares:
     jokes:
       headers:
-        customresponseheaders:
+        customResponseHeaders:
           Server: "'; DROP TABLE users; --"
           X-PoweredBy: Pumas, unicorns and rainbows
           X-NaNaNaNaNaNaNaNa: Batman!

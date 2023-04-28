@@ -2,6 +2,6 @@
 http:
   middlewares:
     compression:
-      minresponsebodybytes: 1024
-      excludedcontenttypes:
+      minResponseBodyBytes: 1024
+      excludedContentTypes:
         - text/event-stream
