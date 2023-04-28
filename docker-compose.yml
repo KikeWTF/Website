@@ -4,6 +4,7 @@ version: "3.8"
 services:
   traefik:
     image: traefik:latest
+    networks: [proxy]
     container_name: traefik
     restart: unless-stopped
     volumes:
@@ -38,6 +39,7 @@ services:
 
   example:
     image: httpd:alpine
+    networks: [proxy]
     depends_on: [traefik]
     container_name: example
     restart: unless-stopped
@@ -55,6 +57,7 @@ services:
 
   gallery:
     image: httpd:alpine
+    networks: [proxy]
     depends_on: [traefik]
     container_name: gallery
     restart: unless-stopped
@@ -71,3 +74,6 @@ services:
 
 volumes:
   certificates: {}
+
+networks:
+  proxy: {}
