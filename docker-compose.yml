@@ -9,6 +9,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - certificates:/letsencrypt:rw
+    ports:
+      - '80:80'
+      - '443:443'
+      - '127.0.0.1:9001:8080'
     command:
       # Traefik
       - '--log.level=INFO'
@@ -23,9 +27,9 @@ services:
       - '--entrypoints.web.address=:80'
       - '--entrypoints.websecure.address=:443'
       # SSL resolvers
-      - '--certificatesresolvers.ssl.acme.httpchallenge=true'
-      - '--certificatesresolvers.ssl.acme.httpchallenge.entrypoint=web'
-      - '--certificatesresolvers.ssl.acme.storage=/letsencrypt.acme.json'
+      - '--certificatesresolvers.letsencrypt.acme.httpchallenge=true'
+      - '--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web'
+      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt.acme.json'
     labels:
       # Middlewares (redirect to https)
       - "traefik.http.middlewares.https-only.redirectscheme.scheme=https"
@@ -47,11 +51,23 @@ services:
       # Middlewares (chains)
       - "traefik.http.middlewares.security.chain.middlewares=https-only"
 
-
-    ports:
-      - '80:80'
-      - '443:443'
-      - '127.0.0.1:9001:8080'
+  example:
+    image: httpd:alpine
+    depends_on: [traefik]
+    container_name: example
+    restart: unless-stopped
+    volumes:
+      - ./example/www:/usr/local/apache2/htdocs:ro
+      - ./example/scripts/patch.sh:/docker-entrypoint.d/patch.sh:ro
+    entrypoint: ['/bin/sh', '-c', '/bin/sh /docker-entrypoint.d/patch.sh && /usr/local/bin/httpd-foreground']
+    environment:
+      - DOMAIN: ${DOMAIN:-kike.wtf}
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.gallery.rule=Host(`example.{{ env "DOMAIN" }}`) && Method(`GET`)'
+      - 'traefik.http.routers.gallery.entrypoints=websecure'
+      - 'traefik.http.routers.gallery.tls=true'
+      - 'traefik.http.routers.gallery.tls.certresolver=letsencrypt'
 
   gallery:
     image: httpd:alpine
@@ -69,7 +85,7 @@ services:
       - 'traefik.http.routers.gallery.middlewares=prefix-gallery@docker'
       - 'traefik.http.routers.gallery.entrypoints=websecure'
       - 'traefik.http.routers.gallery.tls=true'
-      - 'traefik.http.routers.gallery.tls.certresolver=ssl'
+      - 'traefik.http.routers.gallery.tls.certresolver=letsencrypt'
 
 volumes:
   certificates: {}

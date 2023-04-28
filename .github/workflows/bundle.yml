@@ -16,6 +16,16 @@ jobs:
         run: |
           git submodule update --init --recursive
           git submodule update --recursive --remote
+      # Create the bundle directory
+      - name: Create a new bundle directory
+        run: mkdir -p bundle
+      - name: Add the root files to the bundle
+        run: mv .env docker-compose.yml bundle/
+
+      # Compile the 'Example' project
+      - name: Add the project to the bundle
+        run: mkdir -p ../bundle/example && mv www/ scripts/ ../bundle/example/
+        working-directory: example
 
       # Compile the 'Gallery' project
       - name: Install the dependencies
@@ -27,12 +37,11 @@ jobs:
       - name: Build the project
         run: npm run build
         working-directory: gallery
+      - name: Add the built project to the bundle
+        run: mv www/ ../bundle/gallery/
+        working-directory: gallery
 
-      # Create the bundle
-      - name: Create a new bundle directory
-        run: mkdir -p bundle
-      - name: Copy all the files and folders to the bundle directory
-        run: mv .env docker-compose.yml bundle/ && mv gallery/www/ bundle/gallery/
+      # Release the bundle as an artifact
       - name: Upload the compressed archive to GitHub
         uses: actions/upload-artifact@v2
         with:
