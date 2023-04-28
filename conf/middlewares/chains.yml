@@ -1,0 +1,7 @@
+---
+http:
+  middlewares:
+    security:
+      chain:
+        middlewares:
+          - https-only@file

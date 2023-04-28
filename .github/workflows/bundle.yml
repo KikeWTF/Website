@@ -20,7 +20,7 @@ jobs:
       - name: Create a new bundle directory
         run: mkdir -p bundle
       - name: Add the root files to the bundle
-        run: mv .env docker-compose.yml bundle/
+        run: mv docker-compose.yml conf/ bundle/
 
       # Compile the 'Example' project
       - name: Add the project to the bundle

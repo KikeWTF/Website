@@ -1,0 +1,7 @@
+---
+http:
+  middlewares:
+    compression:
+      minresponsebodybytes: 1024
+      excludedcontenttypes:
+        - text/event-stream

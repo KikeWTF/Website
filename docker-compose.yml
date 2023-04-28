@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
+      - ./conf:/etc/traefik/dynamic:ro
       - certificates:/letsencrypt:rw
     ports:
       - '80:80'
@@ -23,66 +24,46 @@ services:
       - '--providers.docker=true'
       - '--providers.docker.watch=true'
       - '--providers.docker.exposedbydefault=false'
+      # File provider
+      - '--providers.file.directory=/etc/traefik/dynamic'
+      - '--providers.file.watch=true'
       # Entrypoints
       - '--entrypoints.web.address=:80'
       - '--entrypoints.websecure.address=:443'
       # SSL resolvers
       - '--certificatesresolvers.letsencrypt.acme.httpchallenge=true'
       - '--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web'
-      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt.acme.json'
-    labels:
-      # Middlewares (redirect to https)
-      - "traefik.http.middlewares.https-only.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.https-only.redirectscheme.permanent=true"
-      - "traefik.http.middlewares.https-only.redirectscheme.port=443"
-      - "traefik.http.middlewares.https-only.headers.forcestsheader=true"
-      - "traefik.http.middlewares.https-only.headers.stspreload=true"
-      - "traefik.http.middlewares.https-only.headers.stsseconds=315360000"
-      - "traefik.http.middlewares.https-only.headers.stsincludesubdomains=true"
-      # Middlewares (compression)
-      - "traefik.http.middlewares.compression.compress=true"
-      - "traefik.http.middlewares.compression.compress.minresponsebodybytes=1024"
-      - "traefik.http.middlewares.compression.compress.excludedcontenttypes=text/event-stream"
-      # Middlewares (jokes)
-      - "traefik.http.middlewares.jokes.headers.customresponseheaders.Server='; DROP TABLE users; --"
-      - "traefik.http.middlewares.jokes.headers.customresponseheaders.X-PoweredBy=Pumas, unicorns and rainbows"
-      - "traefik.http.middlewares.jokes.headers.customresponseheaders.X-NaNaNaNaNaNaNaNa=Batman!"
-      - "traefik.http.middlewares.jokes.headers.customresponseheaders.X-Clacks-Overhead=GNU Kike Fontan"
-      # Middlewares (chains)
-      - "traefik.http.middlewares.security.chain.middlewares=https-only"
+      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
 
   example:
     image: httpd:alpine
-    depends_on: [traefik]
+    depends_on: [traefik,middlewares]
     container_name: example
     restart: unless-stopped
     volumes:
       - ./example/www:/usr/local/apache2/htdocs:ro
       - ./example/scripts/patch.sh:/docker-entrypoint.d/patch.sh:ro
     entrypoint: ['/bin/sh', '-c', '/bin/sh /docker-entrypoint.d/patch.sh && /usr/local/bin/httpd-foreground']
-    environment:
-      - DOMAIN: ${DOMAIN:-kike.wtf}
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.gallery.rule=Host(`example.{{ env "DOMAIN" }}`) && Method(`GET`)'
-      - 'traefik.http.routers.gallery.entrypoints=websecure'
-      - 'traefik.http.routers.gallery.tls=true'
-      - 'traefik.http.routers.gallery.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.example.rule=Host(`example.kike.wtf`) && Method(`GET`)'
+      - 'traefik.http.routers.example.entrypoints=websecure'
+      - 'traefik.http.routers.gallery.middlewares=security@file,compression@file,jokes@file'
+      - 'traefik.http.routers.example.tls=true'
+      - 'traefik.http.routers.example.tls.certresolver=letsencrypt'
 
   gallery:
     image: httpd:alpine
-    depends_on: [traefik]
+    depends_on: [traefik,middlewares]
     container_name: gallery
     restart: unless-stopped
     volumes: [./gallery:/usr/local/apache2/htdocs:ro]
-    environment:
-      - DOMAIN: ${DOMAIN:-kike.wtf}
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.gallery.rule=(Host(`www.{{ env "DOMAIN" }}`) || Host(`{{ env "DOMAIN" }}`)) && PathPrefix(`/gallery/`) && Method(`GET`)'
+      - 'traefik.http.routers.gallery.rule=(Host(`www.kike.wtf`) || Host(`kike.wtf`)) && PathPrefix(`/gallery/`) && Method(`GET`)'
       - 'traefik.http.middlewares.prefix-gallery.stripprefix.prefixes=/gallery'
       - 'traefik.http.middlewares.prefix-gallery.stripprefix.forceSlash=false'
-      - 'traefik.http.routers.gallery.middlewares=prefix-gallery@docker'
+      - 'traefik.http.routers.gallery.middlewares=prefix-gallery@docker,security@file,compression@file,jokes@file'
       - 'traefik.http.routers.gallery.entrypoints=websecure'
       - 'traefik.http.routers.gallery.tls=true'
       - 'traefik.http.routers.gallery.tls.certresolver=letsencrypt'

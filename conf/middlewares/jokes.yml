@@ -1,0 +1,10 @@
+---
+http:
+  middlewares:
+    jokes:
+      headers:
+        customresponseheaders:
+          Server: "'; DROP TABLE users; --"
+          X-PoweredBy: Pumas, unicorns and rainbows
+          X-NaNaNaNaNaNaNaNa: Batman!
+          X-Clacks-Overhead: GNU Kike Fontan
