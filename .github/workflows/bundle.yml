@@ -43,7 +43,7 @@ jobs:
 
       # Release the bundle as an artifact
       - name: Upload the compressed archive to GitHub
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: kike.wtf
           path: bundle
