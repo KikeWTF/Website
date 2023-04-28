@@ -4,6 +4,7 @@ http:
     security:
       chain:
         middlewares:
+          - security-headers@file
           - https-only@file
 
     https-only:

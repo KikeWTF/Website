@@ -1,0 +1,12 @@
+---
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true             # Prevents clickjacking attacks
+        contentTypeNosniff: true    # Prevents browsers from trying to guess a MIME type
+        browserXssFilter: true      # Prevents reflected XSS attacks
+        contentSecurityPolicy: |    # Defines the Content Security Policy
+          "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'self';"
+        referrerPolicy: no-referrer # Hide the Referer header
+        isDevelopment: false        # Always act as if the app is in production
