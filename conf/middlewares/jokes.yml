@@ -4,7 +4,7 @@ http:
     jokes:
       headers:
         customResponseHeaders:
-          Server: "'; DROP TABLE users; --"
+          Server: "'; DROP TABLE users; -- --"
           X-PoweredBy: Pumas, unicorns and rainbows
           X-NaNaNaNaNaNaNaNa: Batman!
           X-Clacks-Overhead: GNU Kike Fontan

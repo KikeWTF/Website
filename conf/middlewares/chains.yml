@@ -5,3 +5,9 @@ http:
       chain:
         middlewares:
           - https-only@file
+
+    https-only:
+      chain:
+        middlewares:
+          - https-redirect@file
+          - hsts@file

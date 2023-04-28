@@ -1,11 +1,13 @@
 ---
 http:
   middlewares:
-    https-only:
+    https-redirect:
       redirectScheme:
         port: 443
         scheme: https
         permanent: true
+
+    hsts:
       headers:
         forceSTSHeader: true
         stsPreload: true
