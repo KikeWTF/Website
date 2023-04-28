@@ -25,6 +25,7 @@ services:
       - '--providers.docker.watch=true'
       - '--providers.docker.exposedbydefault=false'
       # File provider
+      - '--providers.file=true'
       - '--providers.file.directory=/etc/traefik/dynamic'
       - '--providers.file.watch=true'
       # Entrypoints
@@ -37,7 +38,7 @@ services:
 
   example:
     image: httpd:alpine
-    depends_on: [traefik,middlewares]
+    depends_on: [traefik]
     container_name: example
     restart: unless-stopped
     volumes:
@@ -48,13 +49,13 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.example.rule=Host(`example.kike.wtf`) && Method(`GET`)'
       - 'traefik.http.routers.example.entrypoints=websecure'
-      - 'traefik.http.routers.gallery.middlewares=security@file,compression@file,jokes@file'
+      - 'traefik.http.routers.example.middlewares=security@file,compression@file,jokes@file'
       - 'traefik.http.routers.example.tls=true'
       - 'traefik.http.routers.example.tls.certresolver=letsencrypt'
 
   gallery:
     image: httpd:alpine
-    depends_on: [traefik,middlewares]
+    depends_on: [traefik]
     container_name: gallery
     restart: unless-stopped
     volumes: [./gallery:/usr/local/apache2/htdocs:ro]
