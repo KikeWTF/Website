@@ -2,3 +2,8 @@
 	path = gallery
 	url = https://github.com/kikewtf/gallery
 	branch = main
+
+[submodule "example"]
+	path = example
+	url = https://github.com/kikewtf/example
+	branch = main
