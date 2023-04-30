@@ -7,7 +7,6 @@
 	path = example
 	url = https://github.com/kikewtf/example
 	branch = main
-
 [submodule "external/magodavidmaestro"]
 	path = external/magodavidmaestro
 	url = https://github.com/pumazilla/magodavidmaestro
