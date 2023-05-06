@@ -41,13 +41,6 @@ jobs:
         run: mv www/ ../bundle/gallery/
         working-directory: gallery
 
-      # Compile the 'MagoDavidMaestro' project (external)
-      - name: Create the folder
-        run: mkdir -p bundle/magodavidmaestro
-      - name: Add the project to the bundle
-        run: mv .env docker-compose.yml www/ ../../bundle/magodavidmaestro/
-        working-directory: external/magodavidmaestro
-
       # Release the bundle as an artifact
       - name: Upload the compressed archive to GitHub
         uses: actions/upload-artifact@v3
