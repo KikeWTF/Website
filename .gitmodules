@@ -8,7 +8,3 @@
 	url = https://github.com/kikewtf/example
 	branch = main
 
-[submodule "metafiles"]
-	path = metafiles
-	url = https://github.com/kikewtf/metafiles
-	branch = main
