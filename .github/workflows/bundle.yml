@@ -16,16 +16,20 @@ jobs:
         run: |
           git submodule update --init --recursive
           git submodule update --recursive --remote
+
       # Create the bundle directory
       - name: Create a new bundle directory
         run: mkdir -p bundle
       - name: Add the root files to the bundle
         run: mv docker-compose.yml conf/ bundle/
 
-      # Compile the 'Example' project
+      # Compile the 'Metafiles' project
+      - name: Run the script to generate the fake .git directory
+        run: sh scripts/fake-git.sh
+        working-directory: metafiles
       - name: Add the project to the bundle
-        run: mkdir -p ../bundle/example && mv www/ scripts/ ../bundle/example/
-        working-directory: example
+        run: mv public/ ../bundle/root/
+        working-directory: metafiles
 
       # Compile the 'Gallery' project
       - name: Install the dependencies
@@ -38,8 +42,13 @@ jobs:
         run: npm run build
         working-directory: gallery
       - name: Add the built project to the bundle
-        run: mv www/ ../bundle/gallery/
+        run: mkdir -p ../bundle/root/ && mv www/ ../bundle/root/gallery/
         working-directory: gallery
+
+      # Compile the 'Example' project
+      - name: Add the project to the bundle
+        run: mkdir -p ../bundle/example && mv www/ scripts/ ../bundle/example/
+        working-directory: example
 
       # Release the bundle as an artifact
       - name: Upload the compressed archive to GitHub

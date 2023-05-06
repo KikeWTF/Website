@@ -37,6 +37,21 @@ services:
       - '--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web'
       - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
 
+  kikewtf:
+    image: httpd:alpine
+    networks: [proxy]
+    depends_on: [traefik]
+    container_name: kikewtf
+    restart: unless-stopped
+    volumes: [./root:/usr/local/apache2/htdocs:ro]
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.kikewtf.rule=Host(`kike.wtf`) || Host(`www.kike.wtf`)'
+      - 'traefik.http.routers.kikewtf.middlewares=security@file,compression@file,jokes@file'
+      - 'traefik.http.routers.kikewtf.entrypoints=websecure'
+      - 'traefik.http.routers.kikewtf.tls=true'
+      - 'traefik.http.routers.kikewtf.tls.certresolver=letsencrypt'
+
   example:
     image: httpd:alpine
     networks: [proxy]
@@ -54,23 +69,6 @@ services:
       - 'traefik.http.routers.example.middlewares=security@file,compression@file,jokes@file'
       - 'traefik.http.routers.example.tls=true'
       - 'traefik.http.routers.example.tls.certresolver=letsencrypt'
-
-  gallery:
-    image: httpd:alpine
-    networks: [proxy]
-    depends_on: [traefik]
-    container_name: gallery
-    restart: unless-stopped
-    volumes: [./gallery:/usr/local/apache2/htdocs:ro]
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.gallery.rule=(Host(`www.kike.wtf`) || Host(`kike.wtf`)) && PathPrefix(`/gallery/`) && Method(`GET`)'
-      - 'traefik.http.middlewares.prefix-gallery.stripprefix.prefixes=/gallery'
-      - 'traefik.http.middlewares.prefix-gallery.stripprefix.forceSlash=false'
-      - 'traefik.http.routers.gallery.middlewares=prefix-gallery@docker,security@file,compression@file,jokes@file'
-      - 'traefik.http.routers.gallery.entrypoints=websecure'
-      - 'traefik.http.routers.gallery.tls=true'
-      - 'traefik.http.routers.gallery.tls.certresolver=letsencrypt'
 
 volumes:
   certificates: {}
