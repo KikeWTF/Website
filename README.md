@@ -8,7 +8,3 @@ The project can be cloned using the following commands:
 # Clone the project and its submodules using SSH
 git clone --recurse-submodules git@github.com:KikeWTF/Website.git kike.wtf
 ```
-
-## 📝 TODO
-
-- [ ] Add the LICENSE
