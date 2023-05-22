@@ -1,15 +1,27 @@
 ---
 version: "3.8"
 
+x-default: &default-opts
+  depends_on:
+    traefik:
+      condition: service_started
+  logging:
+    options:
+      max-file: 1
+      max-size: 10mb
+  networks: [proxy]
+  restart: unless-stopped
+
 services:
   traefik:
+    <<: *default-opts
     image: traefik:latest
-    networks: [proxy]
     container_name: traefik
+    depends_on: []
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      - ./conf:/etc/traefik/dynamic:ro
+      - ./conf/traefik:/etc/traefik/dynamic:ro
       - certificates:/letsencrypt:rw
     ports:
       - '80:80'
@@ -37,12 +49,11 @@ services:
       - '--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web'
       - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
 
+  # https://kike.wtf/
   kikewtf:
+    <<: *default-opts
     image: httpd:alpine
-    networks: [proxy]
-    depends_on: [traefik]
     container_name: kikewtf
-    restart: unless-stopped
     volumes: [./root:/usr/local/apache2/htdocs:ro]
     labels:
       - 'traefik.enable=true'
@@ -52,16 +63,15 @@ services:
       - 'traefik.http.routers.kikewtf.tls=true'
       - 'traefik.http.routers.kikewtf.tls.certresolver=letsencrypt'
 
+  # https://example.kike.wtf/
   example:
+    <<: *default-opts
     image: httpd:alpine
-    networks: [proxy]
-    depends_on: [traefik]
     container_name: example
-    restart: unless-stopped
+    entrypoint: ['/bin/sh', '-c', '/bin/sh /docker-entrypoint.d/patch.sh && /usr/local/bin/httpd-foreground']
     volumes:
       - ./example/www:/usr/local/apache2/htdocs:ro
       - ./example/scripts/patch.sh:/docker-entrypoint.d/patch.sh:ro
-    entrypoint: ['/bin/sh', '-c', '/bin/sh /docker-entrypoint.d/patch.sh && /usr/local/bin/httpd-foreground']
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.example.rule=Host(`example.kike.wtf`) && Method(`GET`)'

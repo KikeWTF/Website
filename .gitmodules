@@ -1,3 +1,13 @@
+[submodule "metafiles"]
+	path = metafiles
+	url = https://github.com/kikewtf/metafiles
+	branch = main
+
+[submodule "archive"]
+	path = archive
+	url = https://github.com/kikewtf/archive
+	branch = main
+
 [submodule "gallery"]
 	path = gallery
 	url = https://github.com/kikewtf/gallery
@@ -6,9 +16,4 @@
 [submodule "example"]
 	path = example
 	url = https://github.com/kikewtf/example
-	branch = main
-
-[submodule "metafiles"]
-	path = metafiles
-	url = https://github.com/kikewtf/metafiles
 	branch = main

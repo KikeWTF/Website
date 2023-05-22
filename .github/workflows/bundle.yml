@@ -31,6 +31,17 @@ jobs:
         run: mv public/ ../bundle/root/
         working-directory: metafiles
 
+      # Compile the 'Archive' project
+      - name: Install the dependencies
+        run: npm install
+        working-directory: archive
+      - name: Build the project
+        run: npm run build
+        working-directory: archive
+      - name: Add the built project to the bundle
+        run: mkdir -p ../bundle/root/ && mv www/ ../bundle/root/archive/
+        working-directory: archive
+
       # Compile the 'Gallery' project
       - name: Install the dependencies
         run: npm install
